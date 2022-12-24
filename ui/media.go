@@ -19,9 +19,17 @@ func suffix(url string) string {
 	return l[len(l)-1]
 }
 
+func createDir(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return os.Mkdir(dir, 0755)
+	}
+	return nil
+}
+
 func downloadFile(url string) (string, error) {
 	suffix := suffix(url)
 	dir := filepath.Join(os.TempDir(), "tut")
+	createDir(dir)
 	f, err := os.CreateTemp(dir, "tutfile*."+suffix)
 	if err != nil {
 		return "", err
