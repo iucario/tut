@@ -6,13 +6,23 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/RasmusLindroth/go-mastodon"
 	"github.com/atotto/clipboard"
 )
 
+func suffix(url string) string {
+	filename := strings.Split(url, "/")
+	l := strings.Split(filename[len(filename)-1], ".")
+	return l[len(l)-1]
+}
+
 func downloadFile(url string) (string, error) {
-	f, err := os.CreateTemp("", "tutfile")
+	suffix := suffix(url)
+	dir := filepath.Join(os.TempDir(), "tut")
+	f, err := os.CreateTemp(dir, "tutfile*."+suffix)
 	if err != nil {
 		return "", err
 	}
@@ -149,18 +159,10 @@ func openMediaType(tv *TutView, filenames []string, mediaType string) {
 	go func() {
 		for _, ext := range external {
 			exec.Command(ext.Name, ext.Args...).Run()
-			deleteFiles(ext.Filenames)
 		}
 	}()
 	for _, term := range terminal {
 		openInTerminal(tv, term.Name, term.Args...)
-		deleteFiles(term.Filenames)
-	}
-}
-
-func deleteFiles(filenames []string) {
-	for _, filename := range filenames {
-		os.Remove(filename)
 	}
 }
 
